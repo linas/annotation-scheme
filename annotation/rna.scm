@@ -26,8 +26,8 @@
 	#:export (include-rna)
 )
 
-(include "functions.scm")
 (include "util.scm")
+(include "functions.scm")
 
 (define* (include-rna gene-list file-name #:key (coding "True") (noncoding "True") (protein "True"))
 ;;; 
