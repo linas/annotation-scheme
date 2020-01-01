@@ -19,16 +19,16 @@
 ;;; <http://www.gnu.org/licenses/>.
 
 (define-module (annotation rna)
-	#:use-module (annotation functions)
-	#:use-module (annotation util)
-    #:use-module (opencog)
-    #:use-module (opencog query)
-    #:use-module (opencog exec)
-    #:use-module (opencog bioscience)
-	#:use-module (annotation parser)
-    #:export (include-rna)
+	#:use-module (opencog)
+	#:use-module (opencog query)
+	#:use-module (opencog exec)
+	#:use-module (opencog bioscience)
+	#:export (include-rna)
 )
- 
+
+(include "functions.scm")
+(include "util.scm")
+
 (define* (include-rna gene-list file-name #:key (coding "True") (noncoding "True") (protein "True"))
 ;;; 
 ;;; The include-rna function finds coding and non-coding RNA forms of the gene-list. needs 4 arguments to do so.

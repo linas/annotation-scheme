@@ -19,15 +19,14 @@
 ;;; <http://www.gnu.org/licenses/>.
 
 (define-module (annotation gene-pathway)
-      #:use-module (annotation functions)
-      #:use-module (annotation util)
       #:use-module (opencog)
       #:use-module (opencog exec)
       #:use-module (opencog bioscience)
-      #:use-module (annotation parser)
       #:export (gene-pathway-annotation)
 )
 
+(include "util.scm")
+(include "functions.scm")
 
 (define* (gene-pathway-annotation gene_nodes file-name #:key (pathway "reactome") (include_prot "True") (include_sm "True") (namespace "") (parents 0)  (biogrid 1))
     (let ([result '()]

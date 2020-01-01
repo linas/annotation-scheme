@@ -18,14 +18,15 @@
 ;;; along with this software.  If not, see
 ;;; <http://www.gnu.org/licenses/>.
 (define-module (annotation biogrid)
-	#:use-module (annotation functions)
-	#:use-module (annotation util)
 	#:use-module (opencog)
 	#:use-module (opencog exec)
 	#:use-module (opencog bioscience)
-	#:use-module (annotation parser)
 	#:export (biogrid-interaction-annotation)
 )
+
+(include "util.scm")
+(include "functions.scm")
+
 (define* (biogrid-interaction-annotation gene-nodes file-name #:key (interaction "Proteins") (namespace "") (parents 0))
   (let ([result '()]
         [go (if (string=? namespace "") (ListLink) 

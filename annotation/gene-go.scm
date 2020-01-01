@@ -19,14 +19,14 @@
 ;;; <http://www.gnu.org/licenses/>.
 
 (define-module (annotation gene-go)
-    #:use-module (annotation functions)
-    #:use-module (annotation util)
     #:use-module (opencog)
     #:use-module (opencog exec)
     #:use-module (opencog bioscience)
-    #:use-module (annotation parser)
     #:export (gene-go-annotation)
 )
+
+(include "util.scm")
+(include "functions.scm")
 
 (define* (gene-go-annotation gene-nodes file-name #:key (namespace "biological_process molecular_function cellular_component") (parents 0) (protein "True"))
     (let (

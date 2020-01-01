@@ -18,8 +18,6 @@
 ;;; <http://www.gnu.org/licenses/>.
 
 (define-module (annotation parser)
-    #:use-module (annotation util)
-    #:use-module (annotation main)
     #:use-module (nyacc lalr)
     #:use-module (nyacc lex)
     #:use-module (nyacc parse)
@@ -41,6 +39,9 @@
             handle-ln
     )
 )
+
+(include "util.scm")
+(include "main.scm")
 
 (define annts '("main" "gene-go-annotation" "gene-pathway-annotation" "biogrid-interaction-annotation" "rna-annotation"))
 

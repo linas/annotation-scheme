@@ -20,11 +20,6 @@
 
 
 (define-module (annotation main)
-    #:use-module (annotation util)
-    #:use-module (annotation gene-go)
-    #:use-module (annotation gene-pathway)
-    #:use-module (annotation biogrid)
-    #:use-module (annotation parser)
     #:use-module (opencog)
     #:use-module (opencog exec)
     #:use-module (opencog bioscience)
@@ -35,9 +30,14 @@
     #:use-module (rnrs bytevectors)
     #:use-module (ice-9 futures)
     #:use-module (srfi srfi-1)
-    #:use-module (annotation functions)
-    #:use-module (annotation rna)
 )
+
+(include "util.scm")
+(include "functions.scm")
+(include "rna.scm")
+(include "gene-go.scm")
+(include "gene-pathway.scm")
+(include "biogrid.scm")
 
 (define-public (find-genes gene-list)
   "Validate if given gene strings in GENE-LIST exist in the

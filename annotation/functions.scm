@@ -18,7 +18,6 @@
 ;;; <http://www.gnu.org/licenses/>.
 
 (define-module (annotation functions)
-    #:use-module (annotation util)
     #:use-module (opencog)
     #:use-module (opencog exec)
     #:use-module (opencog bioscience)
@@ -26,6 +25,8 @@
     #:use-module (srfi srfi-1)
     #:use-module (ice-9 match)
 )
+
+(include "util.scm")
 
 ;;Given an atom and list of namespaces finds the parents of that atom in the specified namespaces
 (define find-parent
