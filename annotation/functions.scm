@@ -66,6 +66,7 @@
 (define-public generate-interactors-ctr (accum-time "generate-interactors"))
 (define-public build-interaction-ctr (accum-time "build-interaction"))
 (define-public pathway-hierarchy-ctr (accum-time "pathway-hierarchy"))
+(define-public check-pathway-ctr (accum-time "check-pathway"))
 (define-public find-protein-ctr (accum-time "find-protein"))
 (define-public find-protein-form-ctr (accum-time "find-protein-form"))
 (define-public find-mol-ctr (accum-time "find-mol"))
@@ -541,7 +542,13 @@ rv)
   (append res-parent res-child)
 )))
 
-(define-public check-pathway
+(define-public (check-pathway a b c)
+	(check-pathway-ctr #:enter? #t)
+	(let ((rv (xcheck-pathway a b c)))
+	(check-pathway-ctr #:enter? #f)
+	rv))
+	
+(define-public xcheck-pathway
   (lambda (pw parent-pw lst)
     (if (and (member parent-pw (cog-outgoing-set lst)) (member pw (cog-outgoing-set lst)))
     (ListLink

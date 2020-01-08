@@ -57,16 +57,38 @@
 (define-public smpdb-ctr (accum-time "smpdb"))
 
 
-(define (report-gc)
-	(define agc (gc-stats))
-	(define time (cdr (assoc 'gc-time-taken agc)))
-	(define heap (cdr (assoc 'heap-size agc)))
-	(define ngc  (cdr (assoc 'gc-times agc)))
-	(define secs (/ time 1000000000.))
-	(define hrs (/ secs 3600.))
-	(define mb (/ heap 1000000.))
-	(format #t "GC: ~7f secs (~4f hours)  Heap: ~6f MB  times: ~A\n" secs hrs mb ngc)
-)
+(define report-gc
+	(let* ((stime 0)
+			(sngc  0)
+			(srun (get-internal-run-time))
+			(swall (get-internal-real-time))
+			(igtime (cdr (assoc 'gc-time-taken (gc-stats))))
+			(irun srun)
+			(iwall swall)
+		)
+	(lambda ()
+		(define agc (gc-stats))
+		(define time (cdr (assoc 'gc-time-taken agc)))
+		(define run (get-internal-run-time))
+		(define wall (get-internal-real-time))
+		(define heap (cdr (assoc 'heap-size agc)))
+		(define ngc  (cdr (assoc 'gc-times agc)))
+		(define nugc  (- ngc sngc))
+		(define gsecs (/ (- time stime) 1000000000.))
+		(define gacc (/ (- time igtime) 1000000000.))
+		(define psecs (/ (- run irun) 1000000000.))
+		(define wsecs (/ (- wall iwall) 1000000000.))
+		(define hrs (/ gsecs 3600.))
+		(define mb (/ heap 1000000.))
+		; cum proc time has gc time subtracted.
+		(format #t "Heap: ~6f MB  #gc: ~A ~5f secs cum: proc: ~7f wall: ~7f\n"
+			mb nugc gsecs (- psecs gacc) wsecs)
+		(set! stime time)
+		(set! sngc ngc)
+		(set! srun run)
+		(set! swall wall)
+	)
+))
 
 
 (define* (gene-pathway-annotation gene_nodes file-name #:key (pathway "reactome") (include_prot "True") (include_sm "True") (namespace "") (parents 0)  (biogrid 1))
@@ -84,21 +106,23 @@
       (set! result (append result (node-info (GeneNode gene))))
       (for-each (lambda (pathw)
           (if (equal? pathw "smpdb")
-(let ((start (current-time)))
+(let ((start (get-internal-real-time)))
               (set! result (append result (smpdb gene include_prot include_sm go biogrid)))
-(format #t "Did smpdb ~A of ~A for ~A result-len=~A time=~A\n"
-gctr numg gene (length result) (- (current-time) start))
+(format #t "Did smpdb ~A of ~A for ~A result-len=~A time=~6f\n"
+gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
 (report-gc)
 )
               )
           (if (equal? pathw "reactome")
               (begin
-              (let* ((start (current-time))
+              (let* ((start (get-internal-real-time))
 [res (reactome gene include_prot include_sm pwlst go biogrid)])
+(format #t "Did reactome, now append ~A ~A\n" (length (car res)) (length (cdr
+res)))
                 (set! result (append result (car res)))
                 (set! pwlst (append pwlst (cdr res)))
-(format #t "Did reactome ~A of ~A for ~A result-len=~A pwlen=~A time=~A\n"
-gctr numg gene (length result) (length pwlst) (- (current-time) start))
+(format #t "Did reactome ~A of ~A for ~A result-len=~A pwlen=~A time=~6f\n"
+gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-time) start)))
 (report-gc)
               )))
           )(string-split pathway #\ ))
