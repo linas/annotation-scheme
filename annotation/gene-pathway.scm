@@ -57,6 +57,17 @@
 (define-public smpdb-ctr (accum-time "smpdb"))
 
 
+(define (report-gc)
+	(define agc (gc-stats))
+	(define time (cdr (assoc 'gc-time-taken agc)))
+	(define heap (cdr (assoc 'heap-size agc)))
+	(define ngc  (cdr (assoc 'gc-times agc)))
+	(define secs (/ time 1000000000.))
+	(define hrs (/ secs 3600.))
+	(define mb (/ heap 1000000.))
+	(format #t "GC: ~7f secs (~4f hours)  Heap: ~6f MB  times: ~A\n" secs hrs mb ngc)
+)
+
 
 (define* (gene-pathway-annotation gene_nodes file-name #:key (pathway "reactome") (include_prot "True") (include_sm "True") (namespace "") (parents 0)  (biogrid 1))
 (format #t "GC start: ~A\n" (gc-stats))
@@ -77,7 +88,7 @@
               (set! result (append result (smpdb gene include_prot include_sm go biogrid)))
 (format #t "Did smpdb ~A of ~A for ~A result-len=~A time=~A\n"
 gctr numg gene (length result) (- (current-time) start))
-(format #t "GC stuff: ~A\n" (gc-stats))
+(report-gc)
 )
               )
           (if (equal? pathw "reactome")
@@ -88,7 +99,7 @@ gctr numg gene (length result) (- (current-time) start))
                 (set! pwlst (append pwlst (cdr res)))
 (format #t "Did reactome ~A of ~A for ~A result-len=~A pwlen=~A time=~A\n"
 gctr numg gene (length result) (length pwlst) (- (current-time) start))
-(format #t "GC stuff: ~A\n" (gc-stats))
+(report-gc)
               )))
           )(string-split pathway #\ ))
     ) gene_nodes)

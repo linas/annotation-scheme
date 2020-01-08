@@ -921,7 +921,7 @@ rv)
 	(generate-interactors-ctr #:enter? #f)
 	rv))
 	
-(define reported-pathways (make-atom-set))
+(define-public reported-pathways (make-atom-set))
 
 (define-public (xgenerate-interactors path var1 var2)
 	(if (reported-pathways (Set var1 var2)) '()
