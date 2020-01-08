@@ -32,8 +32,37 @@
 	#:use-module (srfi srfi-1)
 	#:use-module (ice-9 match)
 	#:export (create-node
-	          create-edge)
+	          create-edge filter-loc locate-node)
 )
+
+
+(use-modules (ice-9 format))
+
+(define (accum-time name)
+   (let ((fname name)
+         (elapsed 0)
+         (calls 0)
+         (start 0))
+      (lambda* (#:key (enter? #f) (report? #f))
+         (if report?
+            (if (< 0 calls)
+               (format #t 
+                  "Time: ~9f secs. calls: ~A avg: ~8,1f usec/call for ~A\n"
+                  (* 1.0e-9 elapsed)
+                  calls
+                  (/ (* 1.0e-3 elapsed) calls)
+                  fname)
+               (format #t "Zero calls to ~A\n" fname))
+            (if enter?
+               (set! start (get-internal-real-time))
+               (begin
+                  (set! elapsed (+ elapsed
+                     (- (get-internal-real-time) start)))
+                  (set! calls (+ calls 1)))))))
+)
+
+
+(define-public find-name-ctr (accum-time "find-name"))
 
 ;;Define the parameters needed for parsing and GGI
 (define-public nodes (make-parameter '()))
@@ -64,6 +93,7 @@
 ;; Find node name and description
 
 (define-public (node-info node)
+; (format #t "duude node-info=~A\n" node)
   (if (cog-node? node)
     (list
       (EvaluationLink (PredicateNode "has_name") (ListLink node (node-name node)))
@@ -75,6 +105,7 @@
 (define (node-name node)
 	(let
 		( [lst (find-pathway-name node)])
+; (format #t "duude in nonde-name node=~A lst=~A\n" node lst)
 			(if (null? lst)
 				(ConceptNode "N/A")
 				(car lst)
@@ -117,22 +148,14 @@
 	))
 )
 
-(define-public (is-cellular-component? node-info)
- (let*
-  (
-	 [response #f]
-  )
-  (for-each
-   (lambda (info)
-    (if (equal? (cog-name (cog-outgoing-atom info 0)) "GO_namespace")
-	 (set! response (if (equal? "cellular_component" (cog-name (cog-outgoing-atom (cog-outgoing-atom info 1) 1))) #t #f))
-    )
-   )
-  node-info)
-  response
- )
+(define-public (is-cellular-component? info-list)
+	(any
+		(lambda (info)
+			(and
+				(equal? (cog-name (gar info)) "GO_namespace")
+				(equal? "cellular_component" (cog-name (gddr info)))))
+		info-list)
 )
-
 
 (define-public (build-desc-url node)
     (cond 
@@ -177,15 +200,20 @@
 )
 
 ;;finds go name for parser function
-(define find-name
-    (lambda (atom)
+(define-public (find-name a)
+	(find-name-ctr #:enter? #t)
+	(let ((rv (oldfind-name a)))
+	(find-name-ctr #:enter? #f)
+	rv))
+	
+(define oldfind-name (lambda (atom)
      (let*
         (
           [predicate (if (regexp-match? (string-match "GO:[0-9]+" (cog-name atom))) "GO_name" "has_name")]
         )
       (get-name
        (cog-outgoing-set
-        (cog-execute!
+        (cog-execat!  ; cog-execute!
          (GetLink
           (VariableNode "$name")
 
@@ -194,14 +222,23 @@
            (ListLink
             atom
             (VariableNode "$name")
-           )
-          )
-         )
-        )
-       )
-      )
-    )
-    )
+           )))))))))
+
+
+;;Given an atom and list of namespaces finds the parents of that atom in the specified namespaces
+(define (newfind-name GO-ATOM)
+	(define pred (Predicate
+		(if (regexp-match? (string-match "GO:[0-9]+" (cog-name GO-ATOM)))
+			"GO_name" "has_name")))
+
+	(define namli (find
+		(lambda (lili)
+			(any
+				(lambda (evli) (equal? pred (gar evli)))
+				(cog-incoming-by-type lili 'EvaluationLink)))
+		(cog-incoming-by-type GO-ATOM 'ListLink)))
+
+	(if namli (cog-name (gdr namli)) "")
 )
 
 (define-public (filter-genes input-gene gene-name)
@@ -287,6 +324,7 @@
 
 (define-public locate-node
   (lambda(node)
+; (format #t "duude in locate node=~A\n" node)
       (let ([loc (cog-outgoing-set (cog-execute!
         (BindLink
         (VariableNode "$go")
@@ -309,6 +347,7 @@
           )
       ))
       ])
+; (format #t "duude in locate loc=~A\n" loc)
       (if (null? loc)
       (set! loc 
       (cog-outgoing-set (cog-execute!
@@ -335,7 +374,9 @@
 ;; filter only Cell membrane and compartments
 
 (define-public (filter-loc node go)
+; (format #t "duuude in filterloc node=~A go=~A\n" node go)
   (let ([loc (string-downcase (find-name go))])
+; (format #t "duuude in filterloc loc=~A\n" loc)
   (if (or (and (not (string-contains loc "complex")) 
       (or (string-suffix? "ome" loc) (string-suffix? "ome membrane" loc))) (is-compartment loc))
         (EvaluationLink
@@ -349,17 +390,12 @@
   ))
 
 (define (is-compartment loc)
-  (let([compartments (list "vesicle" "photoreceptor" "plasma" "centriole" "cytoplasm" "endosome" "golgi" "vacuole" "granule" "endoplasmic" "mitochondri" "cytosol" "peroxisome" "ribosomes" "lysosome" "nucle")]
-      [res #f])
-    (for-each (lambda (comp)
-      (if (string-contains loc comp)
-        (set! res #t)
-      )) compartments)
-      (if res 
-        #t
-        #f
-      )
-  )
+	(any
+		(lambda (comp) (string-contains loc comp))
+		(list "vesicle" "photoreceptor" "plasma" "centriole"
+			"cytoplasm" "endosome" "golgi" "vacuole" "granule"
+			"endoplasmic" "mitochondri" "cytosol" "peroxisome"
+			"ribosomes" "lysosome" "nucle"))
 )
 
 ;; Add location of a gene/Molecule node in context of Reactome pathway

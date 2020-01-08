@@ -28,9 +28,12 @@
     #:export (gene-go-annotation)
 )
 
+(use-modules (ice-9 threads))
+
 (define* (gene-go-annotation gene-nodes file-name #:key (namespace "biological_process molecular_function cellular_component") (parents 0) (protein "True"))
     (let (
-        [result (flatten (map (lambda (gene) 
+        [result (flatten (map ; n-par-map 2  ; as opposed to just map.
+         (lambda (gene)
           (if (equal? protein "True")
             (ListLink
               (find-go-term (GeneNode gene) (string-split namespace #\ ) parents)

@@ -28,28 +28,72 @@
       #:export (gene-pathway-annotation)
 )
 
+(use-modules (ice-9 format))
+(define (accum-time name)
+   (let ((fname name)
+         (elapsed 0)
+         (calls 0)
+         (start 0))
+      (lambda* (#:key (enter? #f) (report? #f))
+         (if report?
+            (if (< 0 calls)
+               (format #t 
+                  "Time: ~9f secs. calls: ~A avg: ~8,1f usec/call for ~A\n"
+                  (* 1.0e-9 elapsed)
+                  calls
+                  (/ (* 1.0e-3 elapsed) calls)
+                  fname)
+               (format #t "Zero calls to ~A\n" fname))
+            (if enter?
+               (set! start (get-internal-real-time))
+               (begin
+                  (set! elapsed (+ elapsed
+                     (- (get-internal-real-time) start)))
+                  (set! calls (+ calls 1)))))))
+)
+
+
+(define-public reactome-ctr (accum-time "reactome"))
+(define-public smpdb-ctr (accum-time "smpdb"))
+
+
 
 (define* (gene-pathway-annotation gene_nodes file-name #:key (pathway "reactome") (include_prot "True") (include_sm "True") (namespace "") (parents 0)  (biogrid 1))
-    (let ([result '()]
+(format #t "GC start: ~A\n" (gc-stats))
+    (let (
+[gctr 0]
+[numg (length gene_nodes)]
+[result '()]
           [pwlst '()]
           [go (if (string=? namespace "") (ListLink)
                 (ListLink (ConceptNode namespace) (Number parents)))])
 
     (for-each (lambda (gene)
+(set! gctr (+ 1 gctr))
       (set! result (append result (node-info (GeneNode gene))))
       (for-each (lambda (pathw)
           (if (equal? pathw "smpdb")
+(let ((start (current-time)))
               (set! result (append result (smpdb gene include_prot include_sm go biogrid)))
+(format #t "Did smpdb ~A of ~A for ~A result-len=~A time=~A\n"
+gctr numg gene (length result) (- (current-time) start))
+(format #t "GC stuff: ~A\n" (gc-stats))
+)
               )
           (if (equal? pathw "reactome")
               (begin
-              (let ([res (reactome gene include_prot include_sm pwlst go biogrid)])
+              (let* ((start (current-time))
+[res (reactome gene include_prot include_sm pwlst go biogrid)])
                 (set! result (append result (car res)))
                 (set! pwlst (append pwlst (cdr res)))
+(format #t "Did reactome ~A of ~A for ~A result-len=~A pwlen=~A time=~A\n"
+gctr numg gene (length result) (length pwlst) (- (current-time) start))
+(format #t "GC stuff: ~A\n" (gc-stats))
               )))
           )(string-split pathway #\ ))
     ) gene_nodes)
 
+(format #t "done them all\n")
     (let (
       [res (ListLink (ConceptNode "gene-pathway-annotation") (ListLink result))]
     )
@@ -62,6 +106,7 @@
 ;; From SMPDB
 
 (define (smpdb gene prot sm go biogrid)
+(smpdb-ctr #:enter? #t)
   (let (
     [pw (find-pathway-member (GeneNode gene) "SMP")]
     [ls '()]
@@ -95,12 +140,14 @@
     (set! pw (append pw (find-protein (GeneNode gene) 0))) ;; when proteins are selected, genes should only be linked to proteins not to pathways
   )
 
+(smpdb-ctr #:enter? #f)
   (append pw ls)
 ))
 
 ;; From reactome
 
 (define (reactome gene prot sm pwlst go biogrid)
+(reactome-ctr #:enter? #t)
     (let (
       [pw (find-pathway-member (GeneNode gene) "R-HSA")]
       [ls '()]
@@ -136,5 +183,6 @@
     (if (equal? prot "True")
     (set! pw (append pw (find-protein (GeneNode gene) 1)))
     )
+(reactome-ctr #:enter? #f)
       (list (append pw ls) pwlst)
   ))
