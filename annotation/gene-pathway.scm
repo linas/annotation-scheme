@@ -28,6 +28,8 @@
       #:export (gene-pathway-annotation)
 )
 
+(use-modules (ice-9 threads))
+
 (use-modules (ice-9 format))
 (define (accum-time name)
    (let ((fname name)
@@ -101,7 +103,10 @@
           [go (if (string=? namespace "") (ListLink)
                 (ListLink (ConceptNode namespace) (Number parents)))])
 
-    (for-each (lambda (gene)
+    ; n-par-for-each 2 ; 
+	(n-par-for-each 2
+	; for-each
+	 (lambda (gene)
 (set! gctr (+ 1 gctr))
       (set! result (append result (node-info (GeneNode gene))))
       (for-each (lambda (pathw)
@@ -128,11 +133,15 @@ gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-ti
           )(string-split pathway #\ ))
     ) gene_nodes)
 
-(format #t "done them all\n")
+(format #t "done them all len=~A\n" (length result))
     (let (
-      [res (ListLink (ConceptNode "gene-pathway-annotation") (ListLink result))]
+		[ start (get-internal-real-time)]
+		[fres (filter cog-atom? result)]
+      [res (ListLink (ConceptNode "gene-pathway-annotation") (ListLink fres))]
     )
-      (write-to-file res file-name "gene-pathway")
+(format #t "filtered some len=~A\n" (length fres))
+      (write-to-file res file-name "xgene-pathway")
+(format #t "Time to write file: ~A\n" (* 1.0e-9 (- (get-internal-real-time) start)))
       res
     )
 ))

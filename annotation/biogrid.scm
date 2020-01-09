@@ -41,7 +41,7 @@
 ; FIXME: (find-output-interactors (GeneNode gene) 1 go) is called twice,
 ; once for proteins, once for genes.  No need to do that.
 ; Also should throw error if neither is set.
-	(n-par-for-each 2 ; for-each
+	(for-each ; n-par-for-each 2 ; for-each
 	 (lambda (gene)
 (set! gctr (+ 1 gctr))
 		(if (equal? interaction "Proteins")
@@ -62,10 +62,13 @@ gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
 		)
 	) gene-nodes)
 
+(format #t "Done with grid\n")
 	 (let (
+		[start (get-internal-real-time)]
     	[res (ListLink (ConceptNode "biogrid-interaction-annotation") (ListLink result))]
   		)
     	(write-to-file res file-name "biogrid")
+(format #t "Time to write biodgrid nparent=~A is ~A\n" parents (* 1.0e-9 (- (get-internal-real-time) start)))
 		res
   	)
 ))
