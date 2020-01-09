@@ -28,18 +28,30 @@
 )
 (define* (biogrid-interaction-annotation gene-nodes file-name #:key (interaction "Proteins") (namespace "") (parents 0))
   (let ([result '()]
+[gctr 0]
         [go (if (string=? namespace "") (ListLink) 
                 (ListLink (ConceptNode namespace) (Number parents)))])
 	
+; FIXME: (find-output-interactors (GeneNode gene) 1 go) is called twice,
+; once for proteins, once for genes.  No need to do that.
+; Also should throw error if neither is set.
 	(for-each (lambda (gene)
+(set! gctr (+ 1 gctr))
 		(if (equal? interaction "Proteins")
+(let ((start (get-internal-real-time)))
 			(set! result (append result (match-gene-interactors (GeneNode gene) 1 go) (find-output-interactors (GeneNode gene) 1 go)))
+(format #t "Did grid-protein ~A of ~A for ~A result-len=~A time=~6f\n"
+gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
+
+)
 		)
 
 		(if (equal? interaction "Genes") 
-			(begin
+(let ((start (get-internal-real-time)))
 				(set! result (append result  (match-gene-interactors (GeneNode gene) 0 go) (find-output-interactors (GeneNode gene) 0 go)))
-			)
+(format #t "Did grid-gene ~A of ~A for ~A result-len=~A time=~6f\n"
+gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
+)
 		)
 	) gene-nodes)
 
