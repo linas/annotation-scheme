@@ -505,8 +505,46 @@ rv)
 	(let ((rv (xpathway-hierarchy a b)))
 	(pathway-hierarchy-ctr #:enter? #f)
 	rv))
-	
-(define-public xpathway-hierarchy
+
+(define-public (run-query QUERY)
+"
+  Call (cog-execute! QUERY), return results, delete the SetLink.
+  This avoids a memory leak of SetLinks
+"
+	; Run the query
+	(define set-link (cog-execute! QUERY))
+	; Get the query results
+	(define results (cog-outgoing-set set-link))
+	; Delete the SetLink
+	(cog-delete set-link)
+	; Return the results.
+	results
+)
+
+(define-public (xpathway-hierarchy pw lst)
+	(format #t "Enter pathway-hierarchy sizeof lst: ~A\n" (length lst))
+	(if (not (member pw lst)) '()
+	(let* (
+			[parents (run-query
+				(Get (Variable "$parentpw")
+					(Inheritance pw (Variable "$parentpw"))))]
+			[junk (format #t "pathway-hierarchy found parents=~A\n" (length parents))]
+			[res-parent (map
+					(lambda (parent-pw) (check-pathway pw parent-pw lst))
+					parents)]
+			[childs (run-query
+				(Get (Variable "$childpw")
+					(Inheritance (Variable "$childpw") pw)))]
+			[jank (format #t "pathway-hierarchy found childs=~A\n" (length childs))]
+			[res-child (map
+					(lambda (child-pw) (check-pathway child-pw pw lst))
+					childs)]
+		)
+		(append res-parent res-child)
+)))
+
+
+(define-public oldpathway-hierarchy
   (lambda (pw lst)
     (let ([res-parent
       (cog-outgoing-set (cog-execute! (BindLink
@@ -548,7 +586,10 @@ rv)
 	(check-pathway-ctr #:enter? #f)
 	rv))
 	
-(define-public xcheck-pathway
+(define-public (xcheck-pathway pw parent-pw lst)
+	(if (member pw lst) (Inheritance pw parent-pw)))
+
+(define-public oldcheck-pathway
   (lambda (pw parent-pw lst)
     (if (and (member parent-pw (cog-outgoing-set lst)) (member pw (cog-outgoing-set lst)))
     (ListLink
