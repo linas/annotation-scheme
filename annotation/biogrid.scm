@@ -28,6 +28,8 @@
 )
 
 (use-modules (ice-9 format))
+(use-modules (ice-9 threads))
+
 
 (define* (biogrid-interaction-annotation gene-nodes file-name #:key (interaction "Proteins") (namespace "") (parents 0))
   (let ([result '()]
@@ -39,7 +41,8 @@
 ; FIXME: (find-output-interactors (GeneNode gene) 1 go) is called twice,
 ; once for proteins, once for genes.  No need to do that.
 ; Also should throw error if neither is set.
-	(for-each (lambda (gene)
+	(n-par-for-each 2 ; for-each
+	 (lambda (gene)
 (set! gctr (+ 1 gctr))
 		(if (equal? interaction "Proteins")
 (let ((start (get-internal-real-time)))
