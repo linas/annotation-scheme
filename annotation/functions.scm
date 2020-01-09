@@ -876,27 +876,27 @@ rv)
               ((a b)
                   (begin 
                       (if (= 1 (string->number (cog-name prot)))
-                        (let ([coding-prot-a (find-protein-form (GeneNode a))]
-                              [coding-prot-b (find-protein-form (GeneNode b))])
+                        (let ([coding-prot-a (find-protein-form a)]
+                              [coding-prot-b (find-protein-form b)])
                         (if (or (equal? coding-prot-a (ListLink)) (equal? coding-prot-b (ListLink)))
                           (ListLink)
                           (ListLink
                             interaction
-                            (EvaluationLink (PredicateNode "expresses") (ListLink (GeneNode a) coding-prot-a))
-                            (node-info (GeneNode a))
+                            (Evaluation (Predicate "expresses") (ListLink a coding-prot-a))
+                            (node-info a)
                             (node-info coding-prot-a)
                             (locate-node coding-prot-a)
-                            (EvaluationLink (PredicateNode "expresses") (ListLink (GeneNode b) coding-prot-b))
-                            (node-info (GeneNode b))
+                            (EvaluationLink (PredicateNode "expresses") (ListLink b coding-prot-b))
+                            (node-info b)
                             (node-info coding-prot-b)
-                            (locate-node coding-prot-a))
+                            (locate-node coding-prot-b))  ;;; <<< bug fix here
                         ))
                       (ListLink
                           interaction
-                          (node-info (GeneNode a))
-                          (locate-node  (GeneNode a))
-                          (node-info (GeneNode b))
-                          (locate-node  (GeneNode b))
+                          (node-info a)
+                          (locate-node  a)
+                          (node-info b)
+                          (locate-node  b)
                           (if (not (null? namespace))
                           (ListLink
                             (ConceptNode "gene-go-annotation")
@@ -911,22 +911,25 @@ rv)
               ((a)
                   (begin 
                       (if (= 1 (string->number (cog-name prot)))
-                        (let ([coding-prot (find-protein-form (GeneNode a))])
+                        (let ([coding-prot (find-protein-form a)])
                         (if (equal? coding-prot (ListLink))
                           (ListLink)
                           (ListLink
                             interaction
-                            (EvaluationLink (PredicateNode "expresses") (ListLink (GeneNode a) coding-prot))
-                            (node-info (GeneNode a))
+                            (EvaluationLink (PredicateNode "expresses") (ListLink a coding-prot))
+                            (node-info a)
                             (node-info coding-prot)
                             (locate-node coding-prot))
                         ))
                       (ListLink
                           interaction
-                          (node-info (GeneNode a))
-                          (locate-node  (GeneNode a))
+                          (node-info a)
+                          (locate-node  a)
                           (if (not (null? namespace))
-                          (ListLink (ConceptNode "gene-go-annotation") (find-go-term a (string-split (cog-name namespace) #\ ) (string->number (cog-name parent)))
+                          (ListLink (ConceptNode "gene-go-annotation")
+                             (find-go-term a
+                             (string-split (cog-name namespace) #\ )
+                             (string->number (cog-name parent)))
                           (ListLink (ConceptNode "biogrid-interaction-annotation"))
                           )
                           '()
