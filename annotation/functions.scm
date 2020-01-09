@@ -60,6 +60,9 @@
 (define-public add-go-info-ctr (accum-time "add-go-info"))
 (define-public find-parent-ctr (accum-time "find-parent"))
 
+(define-public match-gene-interactors-ctr (accum-time "match-gene-interactors"))
+(define-public find-output-interactors-ctr (accum-time "find-output-interactors"))
+
 (define-public find-pathway-member-ctr (accum-time "find-pathway-member"))
 (define-public pathway-gene-interactors-ctr (accum-time "pathway-gene-interactors"))
 (define-public generate-result-ctr (accum-time "generate-result"))
@@ -690,7 +693,14 @@ rv)
 
 
 ;; Finds genes interacting with a given gene
-(define-public match-gene-interactors
+(define-public (match-gene-interactors a b c)
+	(match-gene-interactors-ctr #:enter? #t)
+	(let ((rv (xmatch-gene-interactors a b c)))
+	(match-gene-interactors-ctr #:enter? #f)
+	rv))
+	
+; FIXME search can be made easier by using SetLink for "interacts_with"
+(define-public xmatch-gene-interactors
     (lambda (gene prot go)
 ; (format #t "duuude match-gene=~A prot=~A go=~A\n" gene prot go)
         (cog-outgoing-set (cog-execute! (BindLink
@@ -726,7 +736,13 @@ rv)
 )
 
 ;;; Finds output genes interacting eachother 
-(define-public find-output-interactors
+(define-public (find-output-interactors a b c)
+	(find-output-interactors-ctr #:enter? #t)
+	(let ((rv (xfind-output-interactors a b c)))
+	(find-output-interactors-ctr #:enter? #f)
+	rv))
+	
+(define-public xfind-output-interactors
     (lambda(gene prot go)
         (cog-outgoing-set 
           (cog-execute! (BindLink

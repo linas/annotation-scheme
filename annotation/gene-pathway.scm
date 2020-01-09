@@ -57,7 +57,7 @@
 (define-public smpdb-ctr (accum-time "smpdb"))
 
 
-(define report-gc
+(define-public report-gc
 	(let* ((stime 0)
 			(sngc  0)
 			(srun (get-internal-run-time))

@@ -26,9 +26,13 @@
 	#:use-module (annotation parser)
 	#:export (biogrid-interaction-annotation)
 )
+
+(use-modules (ice-9 format))
+
 (define* (biogrid-interaction-annotation gene-nodes file-name #:key (interaction "Proteins") (namespace "") (parents 0))
   (let ([result '()]
 [gctr 0]
+[numg (length gene-nodes)]
         [go (if (string=? namespace "") (ListLink) 
                 (ListLink (ConceptNode namespace) (Number parents)))])
 	
