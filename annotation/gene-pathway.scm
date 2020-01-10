@@ -28,6 +28,7 @@
       #:export (gene-pathway-annotation)
 )
 
+(use-modules (srfi srfi-1))
 (use-modules (ice-9 threads))
 
 (use-modules (ice-9 format))
@@ -99,6 +100,7 @@
 [gctr 0]
 [numg (length gene_nodes)]
 [result '()]
+[astart (get-internal-real-time)]
           [pwlst '()]
           [go (if (string=? namespace "") (ListLink)
                 (ListLink (ConceptNode namespace) (Number parents)))])
@@ -133,9 +135,10 @@ gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-ti
           )(string-split pathway #\ ))
     ) gene_nodes)
 
-(format #t "done them all len=~A\n" (length result))
+(format #t "done them all len=~A in ~A\n" (length result)(-
+(get-internal-real-time) astart))
     (let (
-		[ start (get-internal-real-time)]
+		[start (get-internal-real-time)]
 		[fres (filter cog-atom? result)]
       [res (ListLink (ConceptNode "gene-pathway-annotation") (ListLink fres))]
     )

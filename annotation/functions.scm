@@ -525,20 +525,20 @@ rv)
 )
 
 (define-public (xpathway-hierarchy pw lst)
-	(format #t "Enter pathway-hierarchy sizeof lst: ~A\n" (length lst))
+	; (format #t "Enter pathway-hierarchy sizeof lst: ~A\n" (length lst))
 	(if (not (member pw lst)) '()
 	(let* (
 			[parents (run-query
 				(Get (Variable "$parentpw")
 					(Inheritance pw (Variable "$parentpw"))))]
-			[junk (format #t "pathway-hierarchy found parents=~A\n" (length parents))]
+			; [junk (format #t "pathway-hierarchy found parents=~A\n" (length parents))]
 			[res-parent (map
 					(lambda (parent-pw) (check-pathway pw parent-pw lst))
 					parents)]
 			[childs (run-query
 				(Get (Variable "$childpw")
 					(Inheritance (Variable "$childpw") pw)))]
-			[jank (format #t "pathway-hierarchy found childs=~A\n" (length childs))]
+			; [jank (format #t "pathway-hierarchy found childs=~A\n" (length childs))]
 			[res-child (map
 					(lambda (child-pw) (check-pathway child-pw pw lst))
 					childs)]
