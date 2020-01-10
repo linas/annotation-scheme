@@ -137,7 +137,7 @@ gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-ti
 
 (format #t "done them all len=~A in ~A\n" (length result)(-
 (get-internal-real-time) astart))
-    (let (
+    (let* (
 		[start (get-internal-real-time)]
 		[fres (filter cog-atom? result)]
       [res (ListLink (ConceptNode "gene-pathway-annotation") (ListLink fres))]
