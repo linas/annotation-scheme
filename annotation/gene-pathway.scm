@@ -135,8 +135,8 @@ gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-ti
           )(string-split pathway #\ ))
     ) gene_nodes)
 
-(format #t "done them all len=~A in ~A\n" (length result)(-
-(get-internal-real-time) astart))
+(format #t "done them all len=~A in ~6f\n" (length result)(* 1.0e-9 (-
+(get-internal-real-time) astart)))
     (let* (
 		[start (get-internal-real-time)]
 		[fres (filter cog-atom? result)]
