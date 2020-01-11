@@ -215,7 +215,7 @@
         )
       (get-name
        (cog-outgoing-set
-        (cog-execat!  ; cog-execute!
+        (cog-execute! ; cog-execat!  ; cog-execute!
          (GetLink
           (VariableNode "$name")
 
