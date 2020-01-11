@@ -784,7 +784,10 @@ rv)
 ))
 
 ;; Gene interactors for genes in the pathway
-(define-public (pathway-gene-interactors a)
+(define-public pathway-gene-interactors
+	(make-afunc-cache do-pathway-gene-interactors))
+
+(define-public (do-pathway-gene-interactors a)
 	(pathway-gene-interactors-ctr #:enter? #t)
 	(let ((rv (xpathway-gene-interactors a)))
 	(pathway-gene-interactors-ctr #:enter? #f)
