@@ -105,9 +105,9 @@
           [go (if (string=? namespace "") (ListLink)
                 (ListLink (ConceptNode namespace) (Number parents)))])
 
-    ; n-par-for-each 2 ; 
-	(n-par-for-each 2
-	; for-each
+	(
+	; n-par-for-each 2
+	for-each
 	 (lambda (gene)
 (set! gctr (+ 1 gctr))
       (set! result (append result (node-info (GeneNode gene))))
