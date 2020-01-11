@@ -63,6 +63,8 @@
 
 
 (define-public find-name-ctr (accum-time "find-name"))
+(define-public locate-node-ctr (accum-time "locate-node"))
+(define-public add-loc-ctr (accum-time "add-loc"))
 
 ;;Define the parameters needed for parsing and GGI
 (define-public nodes (make-parameter '()))
@@ -322,7 +324,14 @@
     ))
 )
 
-(define-public locate-node
+(define-public (locate-node a)
+   (locate-node-ctr #:enter? #t)
+   (let ((rv (xlocate-node a)))
+   (locate-node-ctr #:enter? #f)
+   rv))
+
+
+(define-public xlocate-node
   (lambda(node)
 ; (format #t "duude in locate node=~A\n" node)
       (let ([loc (cog-outgoing-set (cog-execute!
@@ -400,16 +409,18 @@
 
 ;; Add location of a gene/Molecule node in context of Reactome pathway
 
-(define-public (add-loc node)
-  (let ([child (cog-outgoing-atom node 0)] 
-        [parent (cog-outgoing-atom node 1) ])
+(define-public (add-loc a)
+   (add-loc-ctr #:enter? #t)
+   (let ((rv (xadd-loc a)))
+   (add-loc-ctr #:enter? #f)
+   rv))
+
+(define-public (xadd-loc node)
+  (let ([child (cog-outgoing-atom node 0)] )
       (cog-outgoing-set (cog-execute!
         (BindLink
           (VariableNode "$loc")
           (AndLink
-            (MemberLink 
-              child
-              parent)
             (EvaluationLink
               (PredicateNode "has_location")
               (ListLink
