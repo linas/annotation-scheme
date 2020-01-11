@@ -335,6 +335,7 @@
   (cog-outgoing-set (cog-execute! (BindLink
       (TypedVariable (Variable "$a") (TypeNode 'ConceptNode))
       (AndLink
+;; FIXME it would be faster to just use srfi-1 filter here... OK?
         (EvaluationLink
           (GroundedPredicateNode "scm: filter-atoms")
           (ListLink 
