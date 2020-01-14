@@ -94,7 +94,10 @@
 
 ;; Find node name and description
 
-(define-public (node-info node)
+(define-public node-info
+	(make-afunc-cache xnode-info))
+
+(define-public (xnode-info node)
 ; (format #t "duude node-info=~A\n" node)
   (if (cog-node? node)
     (list
@@ -201,8 +204,26 @@
   )
 )
 
+(define (run-query QUERY)
+"
+  Call (cog-execute! QUERY), return results, delete the SetLink.
+  This avoids a memory leak of SetLinks
+"
+   ; Run the query
+   (define set-link (cog-execute! QUERY))
+   ; Get the query results
+   (define results (cog-outgoing-set set-link))
+   ; Delete the SetLink
+   (cog-delete set-link)
+   ; Return the results.
+   results
+)
+
+(define-public find-name
+	(make-afunc-cache probe-find-name))
+
 ;;finds go name for parser function
-(define-public (find-name a)
+(define (probe-find-name a)
 	(find-name-ctr #:enter? #t)
 	(let ((rv (oldfind-name a)))
 	(find-name-ctr #:enter? #f)
@@ -214,8 +235,8 @@
           [predicate (if (regexp-match? (string-match "GO:[0-9]+" (cog-name atom))) "GO_name" "has_name")]
         )
       (get-name
-       (cog-outgoing-set
-        (cog-execute! ; cog-execat!  ; cog-execute!
+       (run-query
+        ; cog-execute! ; cog-execat!  ; cog-execute!
          (GetLink
           (VariableNode "$name")
 
@@ -224,7 +245,7 @@
            (ListLink
             atom
             (VariableNode "$name")
-           )))))))))
+           ))))))))
 
 
 ;;Given an atom and list of namespaces finds the parents of that atom in the specified namespaces
@@ -324,17 +345,19 @@
     ))
 )
 
-(define-public (locate-node a)
+(define-public locate-node
+	(make-afunc-cache probe-locate-node))
+
+(define (probe-locate-node a)
    (locate-node-ctr #:enter? #t)
    (let ((rv (xlocate-node a)))
    (locate-node-ctr #:enter? #f)
    rv))
 
-
-(define-public xlocate-node
+(define xlocate-node
   (lambda(node)
 ; (format #t "duude in locate node=~A\n" node)
-      (let ([loc (cog-outgoing-set (cog-execute!
+      (let ([loc (run-query
         (BindLink
         (VariableNode "$go")
         (AndLink
@@ -354,12 +377,12 @@
             (VariableNode "$go")
           ))
           )
-      ))
+      )
       ])
 ; (format #t "duude in locate loc=~A\n" loc)
       (if (null? loc)
       (set! loc 
-      (cog-outgoing-set (cog-execute!
+      (run-query
         (BindLink
           (VariableNode "$loc")
           (EvaluationLink
@@ -373,7 +396,7 @@
                 node
                 (VariableNode "$loc")))
           )
-        )))
+        ))
       )
       loc
       )
