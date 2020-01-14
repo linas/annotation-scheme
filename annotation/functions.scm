@@ -605,7 +605,7 @@ rv)
 
 ;; Finds molecules (proteins or chebi's) in a pathway 
 (define-public (find-mol a b)
-	(find-mol-ctr #:enter? #t)
+       (find-mol-ctr #:enter? #t)
 	(let ((rv (xfind-mol a b)))
 	(find-mol-ctr #:enter? #f)
 	rv))
@@ -1149,7 +1149,19 @@ rv)
 	rv))
 	
 (define-public (xfind-pubmed-id gene-a gene-b)
- (let ([pub (cog-outgoing-set (cog-execute!
+	(cache-find-pubmed-id (Set gene-a gene-b)))
+	
+(define cache-find-pubmed-id
+	(make-afunc-cache do-find-pubmed-id))
+
+(define (do-find-pubmed-id gene-set)
+"
+	This is expecting a (SetLink (Gene \"a\") (Gene \"b\")
+"
+ (let* (
+	[gene-a (cog-outgoing-atom gene-set 0)]
+	[gene-b (cog-outgoing-atom gene-set 1)]
+	[pub (run-query
      (GetLink
        (VariableNode "$pub")
        (EvaluationLink
@@ -1165,9 +1177,9 @@ rv)
            )
          )
 
-   )))])
+   ))])
    (if (null? pub)
-     (set! pub (cog-outgoing-set (cog-execute!
+     (set! pub (run-query
      (GetLink
        (VariableNode "$pub")
        (EvaluationLink
@@ -1182,10 +1194,11 @@ rv)
              (VariableNode "$pub")
            )
          )
-   )))
+   ))
    ))
    pub
 ))
+
 (define-public (find-crna gene protein)
   (cog-execute! (BindLink
   (VariableList
