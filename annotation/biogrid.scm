@@ -35,6 +35,7 @@
   (let ([result '()]
 [gctr 0]
 [numg (length gene-nodes)]
+[lstart (get-internal-real-time)]
         [go (if (string=? namespace "") (ListLink) 
                 (ListLink (ConceptNode namespace) (Number parents)))])
 	
@@ -47,8 +48,11 @@
 		(if (equal? interaction "Proteins")
 (let ((start (get-internal-real-time)))
 			(set! result (append result (match-gene-interactors (GeneNode gene) 1 go) (find-output-interactors (GeneNode gene) 1 go)))
-(format #t "Did grid-protein ~A of ~A for ~A result-len=~A time=~6f\n"
-gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
+(format #t "Did grid-protein ~A of ~A for ~A rlen=~A time=~6f acc=~6f\n"
+gctr numg gene (length result) 
+(* 1.0e-9 (- (get-internal-real-time) start))
+(* 1.0e-9 (- (get-internal-real-time) lstart))
+)
 
 )
 		)
@@ -56,8 +60,11 @@ gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
 		(if (equal? interaction "Genes") 
 (let ((start (get-internal-real-time)))
 				(set! result (append result  (match-gene-interactors (GeneNode gene) 0 go) (find-output-interactors (GeneNode gene) 0 go)))
-(format #t "Did grid-gene ~A of ~A for ~A result-len=~A time=~6f\n"
-gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
+(format #t "Did grid-gene ~A of ~A for ~A rlen=~A time=~6f acc=~6f\n"
+gctr numg gene (length result)
+(* 1.0e-9 (- (get-internal-real-time) start))
+(* 1.0e-9 (- (get-internal-real-time) lstart))
+)
 )
 		)
 	) gene-nodes)
