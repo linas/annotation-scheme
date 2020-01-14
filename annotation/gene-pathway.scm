@@ -115,22 +115,25 @@
           (if (equal? pathw "smpdb")
 (let ((start (get-internal-real-time)))
               (set! result (append result (smpdb gene include_prot include_sm go biogrid)))
-(format #t "Did smpdb ~A of ~A for ~A result-len=~A time=~6f\n"
-gctr numg gene (length result) (* 1.0e-9 (- (get-internal-real-time) start)))
-(report-gc)
+(format #t "Did smpdb ~A of ~A for ~A rlen=~A time=~6f acc=~6f\n"
+gctr numg gene (length result)
+(* 1.0e-9 (- (get-internal-real-time) start))
+(* 1.0e-9 (- (get-internal-real-time) astart))
+)
+; (report-gc)
 )
               )
           (if (equal? pathw "reactome")
               (begin
               (let* ((start (get-internal-real-time))
 [res (reactome gene include_prot include_sm pwlst go biogrid)])
-(format #t "Did reactome, now append ~A ~A\n" (length (car res)) (length (cdr
-res)))
+; (format #t "Did reactome, now append ~A ~A\n" (length (car res)) (length (cdr res)))
                 (set! result (append result (car res)))
                 (set! pwlst (append pwlst (cdr res)))
-(format #t "Did reactome ~A of ~A for ~A result-len=~A pwlen=~A time=~6f\n"
-gctr numg gene (length result) (length pwlst) (* 1.0e-9 (- (get-internal-real-time) start)))
-(report-gc)
+(format #t "Did reactome ~A of ~A for ~A rlen=~A pwlen=~A time=~6f\n"
+gctr numg gene (length result) (length pwlst)
+(* 1.0e-9 (- (get-internal-real-time) start)))
+; (report-gc)
               )))
           )(string-split pathway #\ ))
     ) gene_nodes)
