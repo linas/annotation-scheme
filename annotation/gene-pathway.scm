@@ -115,7 +115,7 @@
           (if (equal? pathw "smpdb")
 (let ((start (get-internal-real-time)))
               (set! result (append result (smpdb gene include_prot include_sm go biogrid)))
-(format #t "Did smpdb ~A of ~A for ~A rlen=~A time=~6f acc=~6f\n"
+(format #t "Did  smpdb   ~A of ~A for ~A rlen=~A        time=~6f acc=~6f\n"
 gctr numg gene (length result)
 (* 1.0e-9 (- (get-internal-real-time) start))
 (* 1.0e-9 (- (get-internal-real-time) astart))
