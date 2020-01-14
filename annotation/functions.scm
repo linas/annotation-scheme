@@ -1142,19 +1142,20 @@ rv)
 
 ;;                           
 
-(define-public (find-pubmed-id a b)
-	(find-pubmed-id-ctr #:enter? #t)
-	(let ((rv (xfind-pubmed-id a b)))
-	(find-pubmed-id-ctr #:enter? #f)
-	rv))
-	
-(define-public (xfind-pubmed-id gene-a gene-b)
+(define-public (find-pubmed-id gene-a gene-b)
 	(cache-find-pubmed-id (Set gene-a gene-b)))
 	
 (define cache-find-pubmed-id
 	(make-afunc-cache do-find-pubmed-id))
 
-(define (do-find-pubmed-id gene-set)
+; Measure after caching
+(define (do-find-pubmed-id a)
+	(find-pubmed-id-ctr #:enter? #t)
+	(let ((rv (xdo-find-pubmed-id a)))
+	(find-pubmed-id-ctr #:enter? #f)
+	rv))
+	
+(define (xdo-find-pubmed-id gene-set)
 "
 	This is expecting a (SetLink (Gene \"a\") (Gene \"b\")
 "
