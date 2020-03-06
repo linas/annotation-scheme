@@ -28,6 +28,27 @@
     #:use-module (ice-9 match)
 )
 
+(define-public (add-go-info child-atom parent-atom)
+  "Add information for GO nodes"
+  (define parent-is-go?
+    (match (string-split (cog-name parent-atom) #\:)
+      (("GO" . rest) #t)
+      (_ #f)))
+  (if parent-is-go?
+      (if (member (cog-type child-atom)
+                  '(GeneNode MoleculeNode))
+          (ListLink
+           (MemberLink
+            child-atom
+            parent-atom)
+           (go-info parent-atom))
+          (ListLink
+           (InheritanceLink
+            child-atom
+            parent-atom)
+           (go-info parent-atom)))
+      #f))
+
 (define (find-parent node namespaces)
   "Given an atom and list of namespaces find the parents of that atom
 in the specified namespaces."
@@ -71,27 +92,6 @@ in the specified namespaces."
                               gene
                               (VariableNode "$a"))))))
               namespaces))
-
-(define-public (add-go-info child-atom parent-atom)
-  "Add information for GO nodes"
-  (define parent-is-go?
-    (match (string-split (cog-name parent-atom) #\:)
-      (("GO" . rest) #t)
-      (_ #f)))
-  (if parent-is-go?
-      (if (member (cog-type child-atom)
-                  '(GeneNode MoleculeNode))
-          (ListLink
-           (MemberLink
-            child-atom
-            parent-atom)
-           (go-info parent-atom))
-          (ListLink
-           (InheritanceLink
-            child-atom
-            parent-atom)
-           (go-info parent-atom)))
-      #f))
 
 ;;the main function to find the go terms for a gene with a specification of the parents
 (define-public find-go-term 
