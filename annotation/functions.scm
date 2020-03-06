@@ -74,24 +74,17 @@ in the specified namespaces."
 
 (define (find-memberln gene namespaces)
   "Find GO terms of a gene."
-  (append-map (lambda (ns)
-                (run-query (BindLink
-                            (TypedVariable (Variable "$a") (TypeNode 'ConceptNode))
-                            (AndLink
-                             (MemberLink
-                              gene
-                              (VariableNode "$a"))
-                             (EvaluationLink
-                              (PredicateNode "GO_namespace")
-                              (ListLink
-                               (VariableNode "$a")
-                               (ConceptNode ns)))) 
-                            (ExecutionOutputLink
-                             (GroundedSchemaNode "scm: add-go-info")
-                             (ListLink
-                              gene
-                              (VariableNode "$a"))))))
-              namespaces))
+	(append-map (lambda (ns)
+		(map
+			(lambda (parent) (add-go-info gene parent))
+			(run-query (Get
+				(TypedVariable (Variable "$a") (Type 'ConceptNode))
+				(And
+					(Member gene (Variable "$a"))
+					(Evaluation (Predicate "GO_namespace")
+						(List (Variable "$a") (Concept ns))))
+		))))
+		namespaces))
 
 ;;the main function to find the go terms for a gene with a specification of the parents
 (define-public find-go-term 
