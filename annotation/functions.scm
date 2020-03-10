@@ -32,7 +32,7 @@
   "Given an atom and list of namespaces find the parents of that atom
 in the specified namespaces."
   (let ([atom (cog-outgoing-atom node 1)])
-    (append-map (lambda (ns)
+    (append-map! (lambda (ns)
                   (run-query (BindLink
                               (TypedVariable (Variable "$a") (TypeNode 'ConceptNode))
                               (AndLink
@@ -53,7 +53,7 @@ in the specified namespaces."
 
 (define (find-memberln gene namespaces)
   "Find GO terms of a gene."
-  (append-map (lambda (ns)
+  (append-map! (lambda (ns)
                 (run-query (BindLink
                             (TypedVariable (Variable "$a") (TypeNode 'ConceptNode))
                             (AndLink
@@ -121,7 +121,7 @@ in the specified namespaces."
          [annotation
           (if (null? (find-memberln prot namespace))
               (let ([goterms
-                     (append-map
+                     (append-map!
                       (lambda (ns)
                         (run-query (Get
                                     (TypedVariable (VariableNode "$g")
@@ -133,7 +133,7 @@ in the specified namespaces."
                                                (VariableNode "$g")
                                                (Concept ns)))))))
                       namespace)])
-                (map (lambda (go)
+                (map! (lambda (go)
                        (MemberLink (stv 0.0 0.0) prot go))
                      goterms))
               (find-go-term prot namespace parent))])
@@ -291,7 +291,7 @@ in the specified namespaces."
   'non-coding-rna' should be either the empty list, or the string "True"
   'do-protein' should be either #f or #t.
 "
-	(map
+	(map!
 		(lambda (gene)
 			(add-pathway-genes pathway gene namespace-list num-parents
 				coding-rna non-coding-rna do-protein))
@@ -435,7 +435,7 @@ in the specified namespaces."
 
   If do-protein is #t then protein interactions are included.
 "
-	(map
+	(map!
 		(lambda (act-gene)
 			(generate-result gene act-gene do-protein namespace parents coding non-coding))
 
@@ -458,7 +458,7 @@ in the specified namespaces."
 
   If do-protein is #t then protein interactions are included.
 "
-	(map
+	(map!
 		(lambda (gene-pair)
 			(generate-result (gar gene-pair) (gdr gene-pair) do-protein namespace parents coding non-coding))
 
@@ -772,7 +772,7 @@ in the specified namespaces."
 (define-public (find-rna gene coding noncoding do-protein)
 	(define do-coding (string=? coding "True"))
 	(define do-noncoding (string=? noncoding "True"))
-	(map
+	(map!
 		(lambda (transcribe)
 			(filterbytype gene transcribe do-coding do-noncoding do-protein))
 		(cache-get-rna gene))

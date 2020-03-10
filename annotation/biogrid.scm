@@ -43,15 +43,15 @@
   (let* ([rna (list (if coding (ConceptNode coding) '())
                               (if noncoding (ConceptNode noncoding) '()))]
          [result
-          (append-map (lambda (gene)
+          (append-map! (lambda (gene)
             (match interaction
               ("Proteins"
-               (append (match-gene-interactors (GeneNode gene)
+               (append! (match-gene-interactors (GeneNode gene)
                             #t namespaces parents coding noncoding)
                        (find-output-interactors (GeneNode gene)
                             #t namespaces parents coding noncoding)))
               ("Genes"
-               (append rna
+               (append! rna
                        (match-gene-interactors (GeneNode gene)
                             #f namespaces parents coding noncoding)
                        (find-output-interactors (GeneNode gene)

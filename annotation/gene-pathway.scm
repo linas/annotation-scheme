@@ -48,16 +48,16 @@
          [sm? (string=? include_sm "True")]
          [pathways (string-split pathway #\space)]
          [result
-          (append-map (lambda (gene)
-                        (append 
+          (append-map! (lambda (gene)
+                        (append! 
                          (node-info (GeneNode gene))
-                         (append-map (match-lambda
+                         (append-map! (match-lambda
                                        ("smpdb"
                                         (smpdb gene prot? sm? namespace parents biogrid coding noncoding))
                                        ("reactome"
                                         (match (reactome gene prot? sm? pwlst namespace parents biogrid coding noncoding)
                                           ((first . rest)
-                                           (set! pwlst (append pwlst rest))
+                                           (set! pwlst (append! pwlst rest))
                                            first))))
                                      pathways)))
                       gene-nodes)]
@@ -73,9 +73,9 @@
 	(define namespace-list (string-split namespaces #\space))
 
   (let* ([pw (find-pathway-member (GeneNode gene) "SMP")]
-         [ls (append-map (lambda (path)
+         [ls (append-map! (lambda (path)
                            (let ([node (cog-outgoing-atom (cog-outgoing-atom path 0) 1)])
-                             (append
+                             (append!
                               (if sm? (find-mol node "ChEBI") '())
                               (find-pathway-genes node namespace-list num-parents
                                       coding-rna non-coding-rna prot?)
@@ -89,7 +89,7 @@
                                   (pathway-gene-interactors node)
                                   '()))))
                          pw)])
-    (append pw
+    (append! pw
             ;; when proteins are selected, genes should only be linked to
             ;; proteins not to pathways
             (if prot? (find-protein (GeneNode gene) 0) '())
@@ -102,11 +102,11 @@
 	(define namespace-list (string-split namespaces #\space))
 
   (let* ([pw (find-pathway-member (GeneNode gene) "R-HSA")]
-         [ls (append-map (lambda (path)
+         [ls (append-map! (lambda (path)
                            (let ([node (cog-outgoing-atom (cog-outgoing-atom path 0) 1)])
-                             (set! pwlst (append pwlst (list node)))
+                             (set! pwlst (append! pwlst (list node)))
 
-                             (append
+                             (append!
                               (find-pathway-genes node namespace-list num-parents
                                       coding-rna non-coding-rna prot?)
                               (if prot?
@@ -122,7 +122,7 @@
                               (if sm? (find-mol node "ChEBI") '())
                               (list (pathway-hierarchy node pwlst)))))
                          pw)])
-    (list (append pw
+    (list (append! pw
                   (if prot? (find-protein (GeneNode gene) 1) '())
                   ls)
           pwlst)))

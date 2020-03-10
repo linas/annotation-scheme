@@ -237,7 +237,7 @@
 )
 
 (define (find-current-symbol gene-list)
-  (let ((current (map (lambda (gene)  
+  (let ((current (map! (lambda (gene)  
     (let ((cur (run-query (BindLink
         (TypedVariable (Variable "$g") (Type "GeneNode"))
         (EvaluationLink
@@ -407,5 +407,5 @@
 (define-public (flatten x)
   (cond ((null? x) '())
         ((and (cog-link? x) (null? (cog-outgoing-set x))) '())
-        ((pair? x) (append (flatten (car x)) (flatten (cdr x))))
+        ((pair? x) (append! (flatten (car x)) (flatten (cdr x))))
         (else (list x))))
